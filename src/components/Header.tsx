@@ -57,14 +57,14 @@ const Header = () => {
 
       {/* Main navigation */}
       <nav className="container mx-auto px-4 py-4">
-        <div className="flex items-center">
+        <div className="flex items-center justify-between md:justify-start">
           <div className="text-xl sm:text-2xl font-bold">
             <span className={`${isScrolled ? 'text-black' : 'text-white'}`}>DV</span>
             <span className="text-gold-500"> Transfers</span>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex flex-grow justify-center items-center space-x-8">
+          <div className="hidden md:flex flex-grow justify-center items-center space-x-8 ml-8">
             {navItems.map((item) => (
               <a
                 key={item.name}
