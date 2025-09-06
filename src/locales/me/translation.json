@@ -38,7 +38,7 @@
     "available": "Dostupno"
   },
   "fleet": {
-    "title": "Rent a car",
+    "title": "Vozni park",
     "titleHighlight": "Crna Gora",
     "description": "Rent a car Crna Gora jednostavno, sa modernim, pouzdanim i udobnim vozilima dostupnim širom zemlje. Naša flota je dobro održavana kako bi osigurala sigurnost, pouzdanost i udobnost za svako putovanje. Bilo da vam treba rent a car u Podgorici, Tivtu ili duž Jadranskog mora, naše usluge pružaju pristupačno i bezbrižno putovanje — sve sa transparentnim cijenama i bez potrebe za depozitom.",
     "rentWithoutDeposit": "Rent bez depozita",
@@ -66,7 +66,7 @@
     "title": "Car Transfers",
     "titleHighlight": "Montenegro",
     "description": "Rezervišite udoban transfer u Crnoj Gori uz transparentne cijene, profesionalne vozače, moderna vozila i zagarantovanu udobnost.",
-    "bookTransfer": "Rezerviši transfer",
+    "bookTransfer": "Rezervišite svoj transfer",
     "pickupLocation": "Lokacija preuzimanja",
     "destination": "Odredište",
     "date": "Datum",
@@ -79,7 +79,7 @@
     "customRoute": "Trebate prilagođenu rutu?",
     "contactUs": "Kontaktirajte nas",
     "customQuote": "za personalizovanu ponudu.",
-    "whatsIncluded": "Šta je uključeno:",
+    "whatsIncluded": "Šta je uključeno",
     "professionalDriver": "Profesionalni vozač",
     "comfortableVehicle": "Udobno vozilo",
     "meetGreet": "Doček i pozdrav",
