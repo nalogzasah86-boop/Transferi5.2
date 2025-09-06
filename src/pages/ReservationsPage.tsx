@@ -16,7 +16,8 @@ import {
   X,
   Plus,
   Car,
-  Calculator
+  Calculator,
+  Trash2
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { vehicles } from '../data/vehicles';
@@ -39,6 +40,12 @@ const ReservationsPage = () => {
   const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
   const [selectedCarRental, setSelectedCarRental] = useState<CarRental | null>(null);
   const [showManualRentalForm, setShowManualRentalForm] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    type: 'transfer' | 'rental';
+    id: string;
+    name: string;
+  } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (activeView === 'transfers') {
@@ -91,6 +98,48 @@ const ReservationsPage = () => {
       setError(err.message || 'Failed to load car rentals');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteTransfer = async (id: string) => {
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('reservations')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      // Remove from local state
+      setReservations(prev => prev.filter(r => r.id !== id));
+      setDeleteConfirm(null);
+    } catch (err: any) {
+      console.error('Error deleting transfer:', err);
+      setError(err.message || 'Failed to delete transfer');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteCarRental = async (id: string) => {
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('car_rentals')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      // Remove from local state
+      setCarRentals(prev => prev.filter(r => r.id !== id));
+      setDeleteConfirm(null);
+    } catch (err: any) {
+      console.error('Error deleting car rental:', err);
+      setError(err.message || 'Failed to delete car rental');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -524,6 +573,16 @@ const ReservationsPage = () => {
                               <span className="text-sm text-gray-600">{reservation.phone}</span>
                             </div>
                           </div>
+                          <button
+                            onClick={() => setDeleteConfirm({
+                              type: 'transfer',
+                              id: reservation.id,
+                              name: reservation.name
+                            })}
+                            className="text-red-500 hover:text-red-700 transition-colors p-2"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -597,13 +656,25 @@ const ReservationsPage = () => {
                             </div>
                           </td>
                           <td className="py-4 px-4 sm:px-6">
-                            <button
-                              onClick={() => setSelectedReservation(reservation)}
-                              className="flex items-center space-x-1 text-gold-500 hover:text-gold-600 transition-colors"
-                            >
-                              <Eye className="w-4 h-4" />
-                              <span className="text-sm">View</span>
-                            </button>
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() => setSelectedReservation(reservation)}
+                                className="flex items-center space-x-1 text-gold-500 hover:text-gold-600 transition-colors"
+                              >
+                                <Eye className="w-4 h-4" />
+                                <span className="text-sm">View</span>
+                              </button>
+                              <button
+                                onClick={() => setDeleteConfirm({
+                                  type: 'transfer',
+                                  id: reservation.id,
+                                  name: reservation.name
+                                })}
+                                className="text-red-500 hover:text-red-700 transition-colors p-1"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))
@@ -666,6 +737,16 @@ const ReservationsPage = () => {
                               <span className="text-sm text-gray-600">{rental.customer_phone}</span>
                             </div>
                           </div>
+                          <button
+                            onClick={() => setDeleteConfirm({
+                              type: 'rental',
+                              id: rental.id,
+                              name: rental.customer_name
+                            })}
+                            className="text-red-500 hover:text-red-700 transition-colors p-2"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -728,13 +809,25 @@ const ReservationsPage = () => {
                             <RentalStatusBadge status={rental.status} size="sm" />
                           </td>
                           <td className="py-4 px-6">
-                            <button
-                              onClick={() => setSelectedCarRental(rental)}
-                              className="flex items-center space-x-1 text-gold-500 hover:text-gold-600 transition-colors"
-                            >
-                              <Eye className="w-4 h-4" />
-                              <span className="text-sm">View</span>
-                            </button>
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() => setSelectedCarRental(rental)}
+                                className="flex items-center space-x-1 text-gold-500 hover:text-gold-600 transition-colors"
+                              >
+                                <Eye className="w-4 h-4" />
+                                <span className="text-sm">View</span>
+                              </button>
+                              <button
+                                onClick={() => setDeleteConfirm({
+                                  type: 'rental',
+                                  id: rental.id,
+                                  name: rental.customer_name
+                                })}
+                                className="text-red-500 hover:text-red-700 transition-colors p-1"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))
@@ -1006,6 +1099,59 @@ const ReservationsPage = () => {
           setShowManualRentalForm(false);
         }}
       />
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Trash2 className="w-8 h-8 text-red-500" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">
+                Delete {deleteConfirm.type === 'transfer' ? 'Transfer' : 'Car Rental'}
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Are you sure you want to delete the {deleteConfirm.type === 'transfer' ? 'transfer' : 'car rental'} for{' '}
+                <span className="font-semibold">{deleteConfirm.name}</span>? This action cannot be undone.
+              </p>
+              
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setDeleteConfirm(null)}
+                  disabled={isDeleting}
+                  className="flex-1 px-4 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-semibold transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    if (deleteConfirm.type === 'transfer') {
+                      handleDeleteTransfer(deleteConfirm.id);
+                    } else {
+                      handleDeleteCarRental(deleteConfirm.id);
+                    }
+                  }}
+                  disabled={isDeleting}
+                  className="flex-1 px-4 py-3 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center justify-center space-x-2"
+                >
+                  {isDeleting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Deleting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      <span>Delete</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
