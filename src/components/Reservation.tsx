@@ -154,12 +154,11 @@ const Reservation = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
-            Car Transfers <span className="text-gold-500">Montenegro</span>
+            {t('reservation.title')} <span className="text-gold-500">{t('reservation.titleHighlight')}</span>
           </h2>
           <div className="w-20 h-1 bg-gold-500 mx-auto mb-6"></div>
           <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
-            Book comfortable car transfers Montenegro with transparent pricing. Professional drivers, 
-            luxury vehicles, and guaranteed comfort for all your Montenegro transfer needs.
+            {t('reservation.description')}
           </p>
         </div>
 
