@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { MapPin, ArrowRight, Clock, Users, Phone } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { getTodayString, isDateInPast } from '../lib/dateValidation';
 
 const Reservation = () => {
+  const { t } = useTranslation();
+  
   const [formData, setFormData] = useState({
     pickup: '',
     destination: '',
