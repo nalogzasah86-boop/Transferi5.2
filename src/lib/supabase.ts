@@ -10,12 +10,12 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Helper function to delete a reservation
-export const deleteReservation = async (userId: string): Promise<{ success: boolean; error?: string }> => {
+export const deleteReservation = async (reservationId: string): Promise<{ success: boolean; error?: string }> => {
   try {
     const { error } = await supabase
       .from('reservations')
       .delete()
-      .eq('user_id', userId);
+      .eq('user_id', reservationId);
 
     if (error) {
       console.error('Supabase delete error:', error);
