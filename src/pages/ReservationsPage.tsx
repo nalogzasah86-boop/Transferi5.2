@@ -17,12 +17,17 @@ import {
   Trash2
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { deleteReservation } from '../lib/supabase';
+import { useToast } from '../hooks/useToast';
+import ToastContainer from '../components/ToastContainer';
+import ConfirmDialog from '../components/ConfirmDialog';
 import type { Database } from '../lib/supabase';
 
 type Reservation = Database['public']['Tables']['reservations']['Row'];
 
 const ReservationsPage = () => {
   const navigate = useNavigate();
+  const { toasts, removeToast, success, error: showError } = useToast();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +35,10 @@ const ReservationsPage = () => {
   const [filterDate, setFilterDate] = useState('');
   const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; reservationId: string | null }>({
+    isOpen: false,
+    reservationId: null
+  });
 
   useEffect(() => {
     fetchReservations();
@@ -59,38 +68,29 @@ const ReservationsPage = () => {
   };
 
   const handleDeleteTransfer = async (id: string) => {
-    console.log('🗑️ Starting deletion process for reservation ID:', id);
-    
     if (!id) {
-      console.error('❌ No ID provided for deletion');
+      console.error('No ID provided for deletion');
       return;
     }
 
-    // Confirm deletion
-    if (!window.confirm('Are you sure you want to delete this transfer reservation? This action cannot be undone.')) {
-      console.log('🚫 Deletion cancelled by user');
-      return;
-    }
+    // Show confirmation dialog instead of browser confirm
+    setDeleteConfirm({ isOpen: true, reservationId: id });
+  };
+
+  const confirmDelete = async () => {
+    const id = deleteConfirm.reservationId;
+    if (!id) return;
+
+    setDeleteConfirm({ isOpen: false, reservationId: null });
 
     setDeleteLoading(id);
     
     try {
-      console.log('🔄 Attempting to delete reservation from Supabase...');
-      
-      const { data, error } = await supabase
-        .from('reservations')
-        .delete()
-        .eq('user_id', id)
-        .select(); // Add select to get the deleted record back for confirmation
+      const result = await deleteReservation(id);
 
-      console.log('📊 Supabase delete response:', { data, error });
-
-      if (error) {
-        console.error('❌ Supabase delete error:', error);
-        throw error;
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to delete reservation');
       }
-
-      console.log('✅ Successfully deleted reservation:', data);
 
       // Update local state to remove the deleted reservation
       setReservations(prev => prev.filter(reservation => reservation.user_id !== id));
@@ -100,17 +100,20 @@ const ReservationsPage = () => {
         setSelectedReservation(null);
       }
 
-      console.log('🎉 Local state updated successfully');
+      // Clear any existing errors
+      setError(null);
+      
+      // Show success toast
+      success('Transfer Deleted', 'The transfer reservation has been successfully deleted.');
       
     } catch (err: any) {
-      console.error('💥 Error during deletion process:', err);
+      console.error('Error during deletion process:', err);
       setError(`Failed to delete reservation: ${err.message}`);
       
-      // Show user-friendly error message
-      alert(`Failed to delete reservation: ${err.message}`);
+      // Show error toast
+      showError('Delete Failed', err.message || 'Failed to delete the transfer reservation.');
     } finally {
       setDeleteLoading(null);
-      console.log('🏁 Deletion process completed');
     }
   };
 
@@ -529,6 +532,21 @@ const ReservationsPage = () => {
           </div>
         </div>
       )}
+
+      {/* Toast Container */}
+      <ToastContainer toasts={toasts} onClose={removeToast} />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteConfirm.isOpen}
+        title="Delete Transfer Reservation"
+        message="Are you sure you want to delete this transfer reservation? This action cannot be undone and will permanently remove all associated data."
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteConfirm({ isOpen: false, reservationId: null })}
+        type="danger"
+      />
     </div>
   );
 };

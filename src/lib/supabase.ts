@@ -9,6 +9,26 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
+// Helper function to delete a reservation
+export const deleteReservation = async (userId: string): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const { error } = await supabase
+      .from('reservations')
+      .delete()
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Supabase delete error:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error('Delete reservation error:', err);
+    return { success: false, error: 'Failed to delete reservation' };
+  }
+};
+
 export type Database = {
   public: {
     Tables: {
