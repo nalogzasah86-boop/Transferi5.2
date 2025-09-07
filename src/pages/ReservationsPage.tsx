@@ -74,9 +74,16 @@ const ReservationsPage = () => {
         .from('car_rentals')
         .select('*')
         .order('created_at', { ascending: false });
+
+      if (rentalsError) {
+        throw rentalsError;
+      }
+
+      setReservations(transfersData || []);
+      setCarRentals(rentalsData || []);
     } catch (err: any) {
-      console.error('Error fetching reservations:', err);
-      setError(err.message || 'Failed to load reservations');
+      console.error('Error fetching data:', err);
+      setError(err.message || 'Failed to load data');
     } finally {
       setLoading(false);
     }
