@@ -507,7 +507,11 @@ const ReservationsPage = () => {
                   <span>Send Email</span>
                 </button>
                 <button 
-                  onClick={() => handleDeleteTransfer(selectedReservation.id)}
+                  onClick={() => {
+                    if (selectedReservation?.id) {
+                      handleDeleteTransfer(selectedReservation.id);
+                    }
+                  }}
                   disabled={deleteLoading === selectedReservation.id || !selectedReservation.id}
                   className="flex items-center justify-center space-x-2 border-2 border-red-500 text-red-500 px-6 py-3 rounded-lg font-semibold hover:bg-red-500 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
