@@ -73,7 +73,7 @@ const ReservationsPage = () => {
       return;
     }
 
-    // Show confirmation dialog instead of browser confirm
+    // Show confirmation dialog
     setDeleteConfirm({ isOpen: true, reservationId: id });
   };
 
