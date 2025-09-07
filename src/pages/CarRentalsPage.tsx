@@ -109,7 +109,7 @@ const CarRentalsPage = () => {
 
   const handleDeleteRental = async (id: string) => {
     if (!id) {
-      console.error('No ID provided for deletion');
+      console.error('No user_id provided for deletion');
       return;
     }
 

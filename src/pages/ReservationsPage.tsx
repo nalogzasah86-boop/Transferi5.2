@@ -141,7 +141,7 @@ const ReservationsPage = () => {
 
   const handleDeleteCarRental = async (id: string) => {
     if (!id) {
-      console.error('No ID provided for car rental deletion');
+      console.error('No user_id provided for car rental deletion');
       return;
     }
 
@@ -165,10 +165,10 @@ const ReservationsPage = () => {
       }
 
       // Update local state to remove the deleted car rental
-      setCarRentals(prev => prev.filter(rental => rental.id !== id));
+      setCarRentals(prev => prev.filter(rental => rental.user_id !== id));
       
       // Close modal if the deleted car rental was selected
-      if (selectedCarRental?.id === id) {
+      if (selectedCarRental?.user_id === id) {
         setSelectedCarRental(null);
       }
 
@@ -609,7 +609,7 @@ const ReservationsPage = () => {
                     </tr>
                   ) : (
                     filteredCarRentals.map((rental) => (
-                      <tr key={rental.id} className="border-b hover:bg-gray-50 transition-colors">
+                      <tr key={rental.user_id} className="border-b hover:bg-gray-50 transition-colors">
                         <td className="py-4 px-6">
                           <div>
                             <div className="font-semibold text-gray-800">{rental.customer_name}</div>
@@ -658,17 +658,17 @@ const ReservationsPage = () => {
                               <span className="text-sm">View</span>
                             </button>
                             <button
-                              onClick={() => handleDeleteCarRental(rental.id)}
-                              disabled={deleteLoading === rental.id}
+                              onClick={() => handleDeleteCarRental(rental.user_id)}
+                              disabled={deleteLoading === rental.user_id}
                               className="flex items-center space-x-1 text-red-500 hover:text-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              {deleteLoading === rental.id ? (
+                              {deleteLoading === rental.user_id ? (
                                 <RefreshCw className="w-4 h-4 animate-spin" />
                               ) : (
                                 <Trash2 className="w-4 h-4" />
                               )}
                               <span className="text-sm">
-                                {deleteLoading === rental.id ? 'Deleting...' : 'Delete'}
+                                {deleteLoading === rental.user_id ? 'Deleting...' : 'Delete'}
                               </span>
                             </button>
                           </div>
@@ -960,20 +960,20 @@ const ReservationsPage = () => {
                 </button>
                 <button 
                   onClick={() => {
-                    if (selectedCarRental?.id) {
-                      handleDeleteCarRental(selectedCarRental.id);
+                    if (selectedCarRental?.user_id) {
+                      handleDeleteCarRental(selectedCarRental.user_id);
                     }
                   }}
-                  disabled={deleteLoading === selectedCarRental.id || !selectedCarRental.id}
+                  disabled={deleteLoading === selectedCarRental.user_id || !selectedCarRental.user_id}
                   className="flex items-center justify-center space-x-2 border-2 border-red-500 text-red-500 px-6 py-3 rounded-lg font-semibold hover:bg-red-500 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {deleteLoading === selectedCarRental.id ? (
+                  {deleteLoading === selectedCarRental.user_id ? (
                     <RefreshCw className="w-4 h-4 animate-spin" />
                   ) : (
                     <Trash2 className="w-4 h-4" />
                   )}
                   <span>
-                    {deleteLoading === selectedCarRental.id ? 'Deleting...' : 'Delete Rental'}
+                    {deleteLoading === selectedCarRental.user_id ? 'Deleting...' : 'Delete Rental'}
                   </span>
                 </button>
               </div>
