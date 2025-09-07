@@ -14,7 +14,7 @@ export type Database = {
     Tables: {
       reservations: {
         Row: {
-          id: string
+          user_id: string
           pickup: string
           destination: string
           date: string
@@ -26,7 +26,7 @@ export type Database = {
           created_at: string
         }
         Insert: {
-          id?: string
+          user_id?: string
           pickup: string
           destination: string
           date: string
@@ -38,7 +38,7 @@ export type Database = {
           created_at?: string
         }
         Update: {
-          id?: string
+          user_id?: string
           pickup?: string
           destination?: string
           date?: string

@@ -80,7 +80,7 @@ const ReservationsPage = () => {
       const { data, error } = await supabase
         .from('reservations')
         .delete()
-        .eq('id', id)
+        .eq('user_id', id)
         .select(); // Add select to get the deleted record back for confirmation
 
       console.log('📊 Supabase delete response:', { data, error });
@@ -93,10 +93,10 @@ const ReservationsPage = () => {
       console.log('✅ Successfully deleted reservation:', data);
 
       // Update local state to remove the deleted reservation
-      setReservations(prev => prev.filter(reservation => reservation.id !== id));
+      setReservations(prev => prev.filter(reservation => reservation.user_id !== id));
       
       // Close modal if the deleted reservation was selected
-      if (selectedReservation?.id === id) {
+      if (selectedReservation?.user_id === id) {
         setSelectedReservation(null);
       }
 
@@ -329,7 +329,7 @@ const ReservationsPage = () => {
                   </tr>
                 ) : (
                   filteredReservations.map((reservation) => (
-                    <tr key={reservation.id} className="border-b hover:bg-gray-50 transition-colors">
+                    <tr key={reservation.user_id} className="border-b hover:bg-gray-50 transition-colors">
                       <td className="py-4 px-6">
                         <div>
                           <div className="font-semibold text-gray-800">{reservation.name}</div>
@@ -368,17 +368,17 @@ const ReservationsPage = () => {
                             <span className="text-sm">View</span>
                           </button>
                           <button
-                            onClick={() => handleDeleteTransfer(reservation.id)}
-                            disabled={deleteLoading === reservation.id}
+                            onClick={() => handleDeleteTransfer(reservation.user_id)}
+                            disabled={deleteLoading === reservation.user_id}
                             className="flex items-center space-x-1 text-red-500 hover:text-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            {deleteLoading === reservation.id ? (
+                            {deleteLoading === reservation.user_id ? (
                               <RefreshCw className="w-4 h-4 animate-spin" />
                             ) : (
                               <Trash2 className="w-4 h-4" />
                             )}
                             <span className="text-sm">
-                              {deleteLoading === reservation.id ? 'Deleting...' : 'Delete'}
+                              {deleteLoading === reservation.user_id ? 'Deleting...' : 'Delete'}
                             </span>
                           </button>
                         </div>
@@ -508,20 +508,20 @@ const ReservationsPage = () => {
                 </button>
                 <button 
                   onClick={() => {
-                    if (selectedReservation?.id) {
-                      handleDeleteTransfer(selectedReservation.id);
+                    if (selectedReservation?.user_id) {
+                      handleDeleteTransfer(selectedReservation.user_id);
                     }
                   }}
-                  disabled={deleteLoading === selectedReservation.id || !selectedReservation.id}
+                  disabled={deleteLoading === selectedReservation.user_id || !selectedReservation.user_id}
                   className="flex items-center justify-center space-x-2 border-2 border-red-500 text-red-500 px-6 py-3 rounded-lg font-semibold hover:bg-red-500 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {deleteLoading === selectedReservation.id ? (
+                  {deleteLoading === selectedReservation.user_id ? (
                     <RefreshCw className="w-4 h-4 animate-spin" />
                   ) : (
                     <Trash2 className="w-4 h-4" />
                   )}
                   <span>
-                    {deleteLoading === selectedReservation.id ? 'Deleting...' : 'Delete Transfer'}
+                    {deleteLoading === selectedReservation.user_id ? 'Deleting...' : 'Delete Transfer'}
                   </span>
                 </button>
               </div>
