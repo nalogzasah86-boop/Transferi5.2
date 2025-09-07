@@ -15,14 +15,19 @@ import {
   RefreshCw,
   X,
   Car,
-  Calculator
+  Calculator,
+  Trash2
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { deleteCarRental } from '../lib/supabase';
 import { updateRentalStatus } from '../lib/carAvailability';
 import { vehicles } from '../data/vehicles';
 import ManualRentalForm from '../components/ManualRentalForm';
 import AvailabilityCalendar from '../components/AvailabilityCalendar';
 import RentalStatusBadge from '../components/RentalStatusBadge';
+import { useToast } from '../hooks/useToast';
+import ToastContainer from '../components/ToastContainer';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { Plus } from 'lucide-react';
 import type { Database } from '../lib/supabase';
 
@@ -30,6 +35,7 @@ type CarRental = Database['public']['Tables']['car_rentals']['Row'];
 
 const CarRentalsPage = () => {
   const navigate = useNavigate();
+  const { toasts, removeToast, success, error: showError } = useToast();
   const [carRentals, setCarRentals] = useState<CarRental[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,6 +43,11 @@ const CarRentalsPage = () => {
   const [filterDate, setFilterDate] = useState('');
   const [selectedRental, setSelectedRental] = useState<CarRental | null>(null);
   const [showManualForm, setShowManualForm] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; rentalId: string | null }>({
+    isOpen: false,
+    rentalId: null
+  });
 
   useEffect(() => {
     fetchCarRentals();
@@ -94,6 +105,56 @@ const CarRentalsPage = () => {
     const end = new Date(endDate);
     const diffTime = Math.abs(end.getTime() - start.getTime());
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  };
+
+  const handleDeleteRental = async (id: string) => {
+    if (!id) {
+      console.error('No ID provided for deletion');
+      return;
+    }
+
+    // Show confirmation dialog
+    setDeleteConfirm({ isOpen: true, rentalId: id });
+  };
+
+  const confirmDelete = async () => {
+    const id = deleteConfirm.rentalId;
+    if (!id) return;
+
+    setDeleteConfirm({ isOpen: false, rentalId: null });
+
+    setDeleteLoading(id);
+    
+    try {
+      const result = await deleteCarRental(id);
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to delete car rental');
+      }
+
+      // Update local state to remove the deleted rental
+      setCarRentals(prev => prev.filter(rental => rental.user_id !== id));
+      
+      // Close modal if the deleted rental was selected
+      if (selectedRental?.user_id === id) {
+        setSelectedRental(null);
+      }
+
+      // Clear any existing errors
+      setError(null);
+      
+      // Show success toast
+      success('Car Rental Deleted', 'The car rental reservation has been successfully deleted.');
+      
+    } catch (err: any) {
+      console.error('Error during deletion process:', err);
+      setError(`Failed to delete car rental: ${err.message}`);
+      
+      // Show error toast
+      showError('Delete Failed', err.message || 'Failed to delete the car rental reservation.');
+    } finally {
+      setDeleteLoading(null);
+    }
   };
 
   const exportToCSV = () => {
@@ -328,13 +389,29 @@ const CarRentalsPage = () => {
                         <RentalStatusBadge status={rental.status} size="sm" />
                       </td>
                       <td className="py-4 px-6">
-                        <button
-                          onClick={() => setSelectedRental(rental)}
-                          className="flex items-center space-x-1 text-gold-500 hover:text-gold-600 transition-colors"
-                        >
-                          <Eye className="w-4 h-4" />
-                          <span className="text-sm">View</span>
-                        </button>
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => setSelectedRental(rental)}
+                            className="flex items-center space-x-1 text-gold-500 hover:text-gold-600 transition-colors"
+                          >
+                            <Eye className="w-4 h-4" />
+                            <span className="text-sm">View</span>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteRental(rental.user_id)}
+                            disabled={deleteLoading === rental.user_id}
+                            className="flex items-center space-x-1 text-red-500 hover:text-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {deleteLoading === rental.user_id ? (
+                              <RefreshCw className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
+                            <span className="text-sm">
+                              {deleteLoading === rental.user_id ? 'Deleting...' : 'Delete'}
+                            </span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -477,6 +554,24 @@ const CarRentalsPage = () => {
                   <Mail className="w-4 h-4" />
                   <span>Send Email</span>
                 </button>
+                <button 
+                  onClick={() => {
+                    if (selectedRental?.user_id) {
+                      handleDeleteRental(selectedRental.user_id);
+                    }
+                  }}
+                  disabled={deleteLoading === selectedRental.user_id || !selectedRental.user_id}
+                  className="flex items-center justify-center space-x-2 border-2 border-red-500 text-red-500 px-6 py-3 rounded-lg font-semibold hover:bg-red-500 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {deleteLoading === selectedRental.user_id ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
+                  <span>
+                    {deleteLoading === selectedRental.user_id ? 'Deleting...' : 'Delete Rental'}
+                  </span>
+                </button>
               </div>
             </div>
           </div>
@@ -491,6 +586,21 @@ const CarRentalsPage = () => {
           fetchCarRentals();
           setShowManualForm(false);
         }}
+      />
+
+      {/* Toast Container */}
+      <ToastContainer toasts={toasts} onClose={removeToast} />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteConfirm.isOpen}
+        title="Delete Car Rental Reservation"
+        message="Are you sure you want to delete this car rental reservation? This action cannot be undone and will permanently remove all associated data."
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteConfirm({ isOpen: false, rentalId: null })}
+        type="danger"
       />
     </div>
   );

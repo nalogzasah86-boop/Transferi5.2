@@ -29,6 +29,25 @@ export const deleteReservation = async (reservationId: string): Promise<{ succes
   }
 };
 
+// Helper function to delete a car rental
+export const deleteCarRental = async (rentalId: string): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const { error } = await supabase
+      .from('car_rentals')
+      .delete()
+      .eq('user_id', rentalId);
+
+    if (error) {
+      console.error('Supabase delete car rental error:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error('Delete car rental error:', err);
+    return { success: false, error: 'Failed to delete car rental' };
+  }
+};
 export type Database = {
   public: {
     Tables: {
