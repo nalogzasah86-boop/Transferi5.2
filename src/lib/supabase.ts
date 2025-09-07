@@ -35,7 +35,7 @@ export const deleteCarRental = async (rentalId: string): Promise<{ success: bool
     const { error } = await supabase
       .from('car_rentals')
       .delete()
-      .eq('user_id', rentalId);
+      .eq('id', rentalId);
 
     if (error) {
       console.error('Supabase delete car rental error:', error);
